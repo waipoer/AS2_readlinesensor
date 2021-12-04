@@ -1,0 +1,422 @@
+//#include "linsensor.h"
+//#include "motors.h"
+//#include "encoders.h"
+
+#define L_PWM 10
+#define L_DIR 16
+#define R_PWM 9
+#define R_DIR 15
+
+# define ML_LS 29
+# define MR_LS 22
+# define L_LS 18
+# define C_LS 20
+# define R_LS 21
+# define Led 17
+# define NB_LS 5
+# define EMIT 11
+
+//LineSensor_c LINESENSOR;
+
+
+#define L_LS 18  //SENSORS PIN
+#define C_LS 20
+#define R_LS 21
+
+#define pwm 100
+
+
+volatile boolean lost = false;
+
+unsigned long previousMillis_run = 0;
+const long interval_run = 500;
+unsigned long currentMillis_run;
+unsigned long previousMillis_stop = 0;
+const long interval_stop = 1000;
+unsigned long currentMillis_stop;
+
+unsigned long Millis_pretime = 0;
+const long timegap = 100;
+unsigned long Miliis_curtime = 0;
+boolean statewhite false;
+
+
+unsigned long ET_0;
+unsigned long ET_1;
+unsigned long ET_2;
+unsigned long ET_3;
+unsigned long ET_4;
+unsigned long ML_end_time;
+unsigned long L_end_time;
+unsigned long C_end_time;
+unsigned long R_end_time;
+unsigned long MR_end_time;
+int v_pwm = 0;
+
+
+float sensor0;
+float sensor1;
+float sensor2;
+float sensor3;
+float sensor4;
+
+int ls_pin[NB_LS] = {ML_LS, L_LS, C_LS, R_LS, MR_LS};
+
+void setup() {
+  pinMode(11, OUTPUT);
+  pinMode(11, HIGH);
+  Serial.begin(9600);
+
+}
+
+void motordelay() {
+
+  currentMillis_run = millis();
+  currentMillis_stop = millis();
+  digitalWrite(R_DIR, LOW);
+  digitalWrite(L_DIR, LOW);
+
+  if (currentMillis_stop - previousMillis_stop >= interval_stop) {
+    previousMillis_stop = currentMillis_stop;
+    analogWrite(L_PWM, pwm);
+    analogWrite(R_PWM, pwm);
+  }
+
+  else if (currentMillis_run - previousMillis_run >= interval_run) {
+    previousMillis_run = currentMillis_run;
+  }
+  else
+  {
+
+    analogWrite(L_PWM, 0);
+    analogWrite(R_PWM, 0);
+
+  }
+
+
+}
+//setup timer
+void setupTimer3( int time ) {
+
+  // disable global interrupts
+  cli();
+
+  // Reset timer3 to a blank condition.
+  // TCCR = Timer/Counter Control Register
+  TCCR3A = 0;     // set entire TCCR3A register to 0
+  TCCR3B = 0;     // set entire TCCR3B register to 0
+
+  // First, turn on CTC mode.  Timer3 will count up
+  // and create an interrupt on a match to a value.
+  // See table 14.4 in manual, it is mode 4.
+  TCCR3B = TCCR3B | (1 << WGM32);
+
+  // For a cpu clock precaler of 256:
+  // Shift a 1 up to bit CS32 (clock select, timer 3, bit 2)
+  // Table 14.5 in manual.
+  TCCR3B = TCCR3B | (1 << CS32);
+
+
+  // set compare match register to desired timer count.
+  // CPU Clock  = 16000000 (16mhz).
+  // Prescaler  = 256
+  // Timer freq = 16000000/256 = 62500
+  // We can think of this as timer3 counting up to 62500 in 1 second.
+  // compare match value = 62500 / 2 (we desire 2hz).
+  OCR3A = time;
+
+  // enable timer compare interrupt:
+  TIMSK3 = TIMSK3 | (1 << OCIE3A);
+
+  // enable global interrupts:
+  sei();
+
+}
+
+// The ISR routine.
+// The name TIMER3_COMPA_vect is a special flag to the
+// compiler.  It automatically associates with Timer3 in
+// CTC mode.
+ISR( TIMER3_COMPA_vect ) {
+
+  // Invert LED state.
+  lost = !lost;
+
+  // Enable/disable LED
+  analogWrite(L_PWM, 0);
+  analogWrite(R_PWM, 0);
+
+}
+
+char output;
+
+void judgegrey() {
+
+  if (vlast[2] >= 6000 && vlast[2] < 6400) {
+
+    //        Serial.println(" 0%-16% White ");
+    Serial.print("0");
+    output = 0;
+
+  }
+  else if (vlast[2] >= 5230 && vlast[2] < 6000) {
+
+    //        Serial.println("16%-25% White");
+    Serial.print("1");
+    output = 1;
+
+  }
+  else if (vlast[2] >= 5090 && vlast[2] < 5230) {
+
+    //        Serial.println("25%-28% White");
+    Serial.print("2");
+    output = 2;
+
+  }
+  else if (vlast[2] >= 4900 && vlast[2] < 5090) {
+
+    //      Serial.println("28%-33% White");
+    Serial.print("3");
+    output = 3;
+
+  }
+  else if (vlast[2] >= 4630 && vlast[2] < 4900) {
+    //
+    //      Serial.println("33%-37% White");
+    Serial.print("4");
+    output = 4;
+
+  }
+  else if (vlast[2] >= 4260 && vlast[2] < 4630) {
+
+    //      Serial.println("37%-42% White");
+    Serial.print("5");
+    output = 5;
+  }
+  else if (vlast[2] >= 4050 && vlast[2] < 4260) {
+
+    //      Serial.println("42%-47% White");
+    Serial.print("6");
+    output = 6;
+  }
+  else if (vlast[2] >= 3160 && vlast[2] < 4050) {
+
+    //      Serial.println("47%-54% White");
+    Serial.print("7");
+    output = 7;
+  }
+  else if (vlast[2] >= 3070 && vlast[2] < 3160) {
+
+    //      Serial.println("54%-59% White");
+    Serial.print("8");
+    output = 8;
+  }
+  else if (vlast[2] >= 2640 && vlast[2] < 3070) {
+
+    //      Serial.println("59%-69% White");
+    Serial.print("9");
+    output = 9;
+  }
+  else if (vlast[2] >= 1575 && vlast[2] < 2640) {
+
+    //      Serial.println("69%-75% White");
+    Serial.print("a");
+    output = a;
+  } else if (vlast[2] >= 1575 && vlast[2] < 1450) {
+
+    //      Serial.println("75%-87% White");
+    Serial.print("b");
+    output = b;
+  } else if (vlast[2] >= 1250 && vlast[2] < 1450) {
+
+    //      Serial.println("87%-91% White");
+    Serial.print("c");
+    output = c;
+  }
+  else if (vlast[2] >= 900 && vlast[2] < 1450) {
+
+    //      Serial.println("91%-100% White");
+    Serial.print("d");
+    output = d;
+  }
+
+  else {
+
+    Serial.println(" 100% white ");
+
+
+  }
+}
+
+
+
+void loop() {
+  for ( int i = 0; i < 200; i++) {
+    //  Motors_c.movedelay();
+    motordelay();
+    int which;
+    unsigned long start_time;
+
+    pinMode(ML_LS, OUTPUT);
+    pinMode(L_LS, OUTPUT);
+    pinMode(C_LS, OUTPUT);
+    pinMode(R_LS, OUTPUT);
+    pinMode(MR_LS, OUTPUT);
+
+    digitalWrite(ML_LS, HIGH);
+    digitalWrite(L_LS, HIGH);
+    digitalWrite(C_LS, HIGH);
+    digitalWrite(R_LS, HIGH);
+    digitalWrite(MR_LS, HIGH);
+    delayMicroseconds(10);
+
+    pinMode(ML_LS, INPUT);
+    pinMode(L_LS, INPUT);
+    pinMode(C_LS, INPUT);
+    pinMode(R_LS, INPUT);
+    pinMode(MR_LS, INPUT);
+    //  LINESENSOR.initialise(ML_LS, L_LS, C_LS, R_LS, MR_LS);
+    start_time = micros();
+    bool done = false;
+    bool done0 = false;
+    bool done1 = false;
+    bool done2 = false;
+    bool done3 = false;
+    bool done4 = false;
+    unsigned long end_time[NB_LS] = {ML_end_time, L_end_time, C_end_time, R_end_time, ML_end_time};
+    unsigned long vlast[NB_LS] = {ET_0, ET_1, ET_2, ET_3, ET_4};
+
+    while (done == false)
+      for (which = 0; which < NB_LS; which++) {
+        if (digitalRead(ls_pin[which]) == LOW && vlast[which] == 0 ) {
+          end_time[which] = micros();
+
+          vlast[which] = end_time[which] - start_time;
+          if (which == 0) {
+            done0 = true;
+          }
+          if (which == 1) {
+            done1 = true;
+          }
+          if (which == 2) {
+            done2 = true;
+          }
+          if (which == 3) {
+            done3 = true;
+          }
+          if (which == 4) {
+            done4 = true;
+          }
+          if ((done0 == true) && (done1 == true) && (done2 == true) && (done3 == true) && (done4 == true)) {
+            done = true;
+
+            // just need to make this part work or not.
+            //          Serial.print(vlast[0]);
+            //          Serial.print(" ");
+            //          Serial.print(vlast[1]);
+            //          Serial.print(" ");
+            //            Serial.print(vlast[2]);
+            //            Serial.print(",");
+            //          Serial.print(vlast[3]);
+            //          Serial.print(" ");
+            //          Serial.println(vlast[4]);
+
+
+          }
+        }
+
+
+        sensor0 = vlast[0];
+        sensor1 = vlast[1];
+        sensor2 = vlast[2];
+        sensor3 = vlast[3];
+        sensor4 = vlast[4];
+      }
+
+//    judgegrey();
+  }
+
+  Serial.print("\n");
+
+}
+
+//
+//      for(int i=0; i<10;i++){
+//
+//
+//  digitalWrite(R_DIR, LOW);
+//  digitalWrite(L_DIR, LOW);
+//  analogWrite(L_PWM, pwm);
+//  analogWrite(R_PWM, pwm);
+//
+//        setupTimer3(5);
+//
+//        }
+//
+//}
+
+//    delay(10);
+//    analogWrite(L_PWM, 0);
+//    analogWrite(R_PWM, 0);
+//
+//    delay(5000);
+//
+
+
+
+
+
+//bangbang controller
+//  float W_left = 1.15 * sensor1 + sensor2 * 0.5;
+//  float W_right = sensor3 + sensor2 * 0.5;
+//  float W_total = W_left + W_right;
+//
+//  float e_line = (W_left - W_right) / W_total;
+//
+//if (e_line<-0.3){
+//  e_line = -0.3;
+//  }
+//  else if(e_line>0.3){
+//    e_line = 0.3;
+//  }
+//
+//  float T_pwm_value;
+//
+//  T_pwm_value = 30;
+//
+//  T_pwm_value = T_pwm_value * e_line;
+//
+////  Serial.println(e_line);
+//
+//  if (e_line > 0.15) {
+//    digitalWrite(R_DIR, LOW);
+//    digitalWrite(L_DIR, HIGH);
+//    analogWrite(L_PWM, pwm + T_pwm_value);
+//    analogWrite(R_PWM, pwm + T_pwm_value);
+//  }
+//
+//  else if (e_line < -0.15) {
+//    digitalWrite(R_DIR, HIGH);
+//    digitalWrite(L_DIR, LOW);
+//    analogWrite(L_PWM, pwm + T_pwm_value);
+//    analogWrite(R_PWM, pwm + T_pwm_value);
+//  }
+//
+//  else if (e_line < 0.15 && e_line > -0.15) {
+//    digitalWrite(R_DIR, LOW);
+//    digitalWrite(L_DIR, LOW);
+//    analogWrite(L_PWM, pwm + T_pwm_value);
+//    analogWrite(R_PWM, pwm + T_pwm_value);
+//  }
+//
+//  if (sensor0 > 10000 && sensor4 > 15000) {
+//    digitalWrite(R_DIR, HIGH);
+//    digitalWrite(L_DIR, LOW);
+//    analogWrite(L_PWM, pwm + T_pwm_value);
+//    analogWrite(R_PWM, pwm + T_pwm_value);
+//  }
+//  delay(10);
+//
+//
+//
+//}
