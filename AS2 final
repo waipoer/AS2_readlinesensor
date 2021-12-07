@@ -1,7 +1,3 @@
-//#include "linsensor.h"
-//#include "motors.h"
-//#include "encoders.h"
-
 #define L_PWM 10
 #define L_DIR 16
 #define R_PWM 9
@@ -318,15 +314,7 @@ void loop() {
           }
           if ((done0 == true) && (done1 == true) && (done2 == true) && (done3 == true) && (done4 == true)) {
             done = true;
-            //          Serial.print(vlast[0]);
-            //          Serial.print(" ");
-            //          Serial.print(vlast[1]);
-            //          Serial.print(" ");
-            //            Serial.print(vlast[2]);
-            //            Serial.print(",");
-            //          Serial.print(vlast[3]);
-            //          Serial.print(" ");
-            //          Serial.println(vlast[4]);
+
 
 
           }
@@ -339,10 +327,18 @@ void loop() {
         //        sensor3 = vlast[3];
         //        sensor4 = vlast[4];
       }
-
+    Serial.print(vlast[0]);
+    Serial.print(" ");
+    Serial.print(vlast[1]);
+    Serial.print(" ");
+    Serial.print(vlast[2]);
+    Serial.print(",");
+    Serial.print(vlast[3]);
+    Serial.print(" ");
+    Serial.println(vlast[4]);
     judgegrey();
 
-    if (times_on_white >= 5) {
+    if (times_on_white <= 5) {
       Millis_curtime = millis();
 
       if (Millis_curtime - Millis_pretime >= timegap) {
@@ -356,11 +352,12 @@ void loop() {
         //not on the white surface
         else {
           statewhite = false;
+          times_on_white -= 1;
           samples[index] = output;
           index += 1;
 
           if (samples[index] == samples[index - 1]) {
-            if (has_output = false) {
+            if (has_output == false) {
               Serial.print(output);
               Serial.print(",");
               has_output = true;
@@ -388,4 +385,3 @@ void loop() {
   }
   //  Serial.print("\n");
 }
-
