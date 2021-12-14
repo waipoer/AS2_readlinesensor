@@ -238,18 +238,18 @@ void judgegrey() {
     //      Serial.println("75%-87% White");
     //    Serial.print("b");
     output = 'b';
-  } else if (vlast[2] >= 1250 && vlast[2] < 1450) {
+  } else if (vlast[2] >= 1250 && vlast[2] < 1500) {
 
     //      Serial.println("87%-91% White");
     //    Serial.print("c");
     output = 'c';
   }
-  //  else if (vlast[2] >= 900 && vlast[2] < 1450) {
-  //
-  //    //      Serial.println("91%-100% White");
-  //    Serial.print("d");
-  //    output = 'd';
-  //  }
+    else if (vlast[2] >= 1300 && vlast[2] < 1500) {
+  
+      //      Serial.println("91%-100% White");
+//      Serial.print("d");
+      output = 'd';
+    }
 
   else {
     // do nothing
@@ -350,17 +350,17 @@ void loop() {
 
   }
 
-  /*
-    Serial.print(vlast[0]);
-    Serial.print(" ");
-    Serial.print(vlast[1]);
-    Serial.print(" ");
-    Serial.print(vlast[2]);
-    Serial.print(",");
-    Serial.print(vlast[3]);
-    Serial.print(" ");
-    Serial.println(vlast[4]);
-  */
+
+//    Serial.print(vlast[0]);
+//    Serial.print(" ");
+//    Serial.print(vlast[1]);
+//    Serial.print(" ");
+//    Serial.print(vlast[2]);
+//    Serial.print(",");
+//    Serial.print(vlast[3]);
+//    Serial.print(" ");
+//    Serial.println(vlast[4]);
+
   judgegrey();
 
   if (times_on_white <= 5) {
@@ -370,7 +370,7 @@ void loop() {
       Millis_pretime = Millis_curtime;
 
       //on the white surface
-      if (vlast[2] < 1450 || vlast[2] > 6400) {
+      if (vlast[2] < 1200 || vlast[2] > 6400) {
         statewhite = true;//do nothing
         times_on_white += 1;
       }
@@ -391,19 +391,19 @@ void loop() {
           if (has_output == false) {
             Serial.print(" has_output==false: ");
             Serial.print(samples[index - 1]);
-            Serial.print(",");
+            Serial.println(",");
             has_output = true;
           } else {
 
             //                Serial.print(" has_output==true\n ");
           }
         } else {  // samples[index] != samples[index - 1])
-          Serial.print("NO MATCH: index = ");
-          Serial.print( index );
-          Serial.print(",");
-          Serial.print( samples[ index ] );
-          Serial.print( " vs " );
-          Serial.println( samples[ index - 1 ] );
+//          Serial.print("NO MATCH: index = ");
+//          Serial.print( index );
+//          Serial.print(",");
+//          Serial.print( samples[ index ] );
+//          Serial.print( " vs " );
+//          Serial.println( samples[ index - 1 ] );
           has_output = false;
         }
         //          }
