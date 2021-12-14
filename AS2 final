@@ -1,3 +1,7 @@
+//#include "linsensor.h"
+//#include "motors.h"
+//#include "encoders.h"
+
 #define L_PWM 10
 #define L_DIR 16
 #define R_PWM 9
@@ -385,3 +389,85 @@ void loop() {
   }
   //  Serial.print("\n");
 }
+
+
+//
+//      for(int i=0; i<10;i++){
+//
+//
+//  digitalWrite(R_DIR, LOW);
+//  digitalWrite(L_DIR, LOW);
+//  analogWrite(L_PWM, pwm);
+//  analogWrite(R_PWM, pwm);
+//
+//        setupTimer3(5);
+//
+//        }
+//
+//}
+
+//    delay(10);
+//    analogWrite(L_PWM, 0);
+//    analogWrite(R_PWM, 0);
+//
+//    delay(5000);
+//
+
+
+
+
+
+//bangbang controller
+//  float W_left = 1.15 * sensor1 + sensor2 * 0.5;
+//  float W_right = sensor3 + sensor2 * 0.5;
+//  float W_total = W_left + W_right;
+//
+//  float e_line = (W_left - W_right) / W_total;
+//
+//if (e_line<-0.3){
+//  e_line = -0.3;
+//  }
+//  else if(e_line>0.3){
+//    e_line = 0.3;
+//  }
+//
+//  float T_pwm_value;
+//
+//  T_pwm_value = 30;
+//
+//  T_pwm_value = T_pwm_value * e_line;
+//
+////  Serial.println(e_line);
+//
+//  if (e_line > 0.15) {
+//    digitalWrite(R_DIR, LOW);
+//    digitalWrite(L_DIR, HIGH);
+//    analogWrite(L_PWM, pwm + T_pwm_value);
+//    analogWrite(R_PWM, pwm + T_pwm_value);
+//  }
+//
+//  else if (e_line < -0.15) {
+//    digitalWrite(R_DIR, HIGH);
+//    digitalWrite(L_DIR, LOW);
+//    analogWrite(L_PWM, pwm + T_pwm_value);
+//    analogWrite(R_PWM, pwm + T_pwm_value);
+//  }
+//
+//  else if (e_line < 0.15 && e_line > -0.15) {
+//    digitalWrite(R_DIR, LOW);
+//    digitalWrite(L_DIR, LOW);
+//    analogWrite(L_PWM, pwm + T_pwm_value);
+//    analogWrite(R_PWM, pwm + T_pwm_value);
+//  }
+//
+//  if (sensor0 > 10000 && sensor4 > 15000) {
+//    digitalWrite(R_DIR, HIGH);
+//    digitalWrite(L_DIR, LOW);
+//    analogWrite(L_PWM, pwm + T_pwm_value);
+//    analogWrite(R_PWM, pwm + T_pwm_value);
+//  }
+//  delay(10);
+//
+//
+//
+//}
