@@ -1,4 +1,4 @@
-#define L_PWM 10 
+#define L_PWM 10
 #define L_DIR 16
 #define R_PWM 9
 #define R_DIR 15
@@ -262,163 +262,164 @@ bool stateoutput = false;
 
 
 void loop() {
-  for ( int i = 0; i < 200; i++) {
-    //  Motors_c.movedelay();
-    motordelay();
-    int which;
-    unsigned long start_time;
-    times_on_white = 0;
+  //  for ( int i = 0; i < 200; i++) {
+  //  Motors_c.movedelay();
+  motordelay();
+  int which;
+  unsigned long start_time;
+  times_on_white = 0;
 
-    pinMode(ML_LS, OUTPUT);
-    pinMode(L_LS, OUTPUT);
-    pinMode(C_LS, OUTPUT);
-    pinMode(R_LS, OUTPUT);
-    pinMode(MR_LS, OUTPUT);
+  pinMode(ML_LS, OUTPUT);
+  pinMode(L_LS, OUTPUT);
+  pinMode(C_LS, OUTPUT);
+  pinMode(R_LS, OUTPUT);
+  pinMode(MR_LS, OUTPUT);
 
-    digitalWrite(ML_LS, HIGH);
-    digitalWrite(L_LS, HIGH);
-    digitalWrite(C_LS, HIGH);
-    digitalWrite(R_LS, HIGH);
-    digitalWrite(MR_LS, HIGH);
-    delayMicroseconds(10);
+  digitalWrite(ML_LS, HIGH);
+  digitalWrite(L_LS, HIGH);
+  digitalWrite(C_LS, HIGH);
+  digitalWrite(R_LS, HIGH);
+  digitalWrite(MR_LS, HIGH);
+  delayMicroseconds(10);
 
-    // Paul: this might effect your performance.
-    //pinMode( 11, OUTPUT );
-    //digitalWrite( 11, HIGH );
+  // Paul: this might effect your performance.
+  //pinMode( 11, OUTPUT );
+  //digitalWrite( 11, HIGH );
 
-    pinMode(ML_LS, INPUT);
-    pinMode(L_LS, INPUT);
-    pinMode(C_LS, INPUT);
-    pinMode(R_LS, INPUT);
-    pinMode(MR_LS, INPUT);
+  pinMode(ML_LS, INPUT);
+  pinMode(L_LS, INPUT);
+  pinMode(C_LS, INPUT);
+  pinMode(R_LS, INPUT);
+  pinMode(MR_LS, INPUT);
 
-    analogWrite(L_PWM, 15);
-    analogWrite(R_PWM, 15);
-    //  LINESENSOR.initialise(ML_LS, L_LS, C_LS, R_LS, MR_LS);
+  analogWrite(L_PWM, 15);
+  analogWrite(R_PWM, 15);
+  //  LINESENSOR.initialise(ML_LS, L_LS, C_LS, R_LS, MR_LS);
 
-    start_time = micros();
+  start_time = micros();
 
-    for ( which = 0; which < NB_LS; which++ ) vlast[which] = 0;
+  for ( which = 0; which < NB_LS; which++ ) vlast[which] = 0;
 
-    done0 = false;
-    done1 = false;
-    done2 = false;
-    done3 = false;
-    done4 = false;
+  done0 = false;
+  done1 = false;
+  done2 = false;
+  done3 = false;
+  done4 = false;
 
-    done = false;
-    while (done == false) { // paul: {
+  done = false;
+  while (done == false) { // paul: {
 
-      // loop through sensors
-      for (which = 0; which < NB_LS; which++) {
+    // loop through sensors
+    for (which = 0; which < NB_LS; which++) {
 
 
-        // low and not recorded before.
-        if ( digitalRead(ls_pin[which]) == LOW && vlast[which] == 0 ) {
+      // low and not recorded before.
+      if ( digitalRead(ls_pin[which]) == LOW && vlast[which] == 0 ) {
 
-          end_time[which] = micros();
+        end_time[which] = micros();
 
-          vlast[which] = end_time[which] - start_time;
+        vlast[which] = end_time[which] - start_time;
 
-          if (which == 0) {
-            done0 = true;
-          }
-          if (which == 1) {
-            done1 = true;
-          }
-          if (which == 2) {
-            done2 = true;
-          }
-          if (which == 3) {
-            done3 = true;
-          }
-          if (which == 4) {
-            done4 = true;
-          }
-          if ((done0 == true) && (done1 == true) && (done2 == true) && (done3 == true) && (done4 == true) ) {
-            done = true;
-          }
+        if (which == 0) {
+          done0 = true;
         }
-
-        //
-        //        sensor0 = vlast[0];
-        //        sensor1 = vlast[1];
-        //        sensor2 = vlast[2];
-        //        sensor3 = vlast[3];
-        //        sensor4 = vlast[4];
-      }
-
-    }
-
-    /*
-      Serial.print(vlast[0]);
-      Serial.print(" ");
-      Serial.print(vlast[1]);
-      Serial.print(" ");
-      Serial.print(vlast[2]);
-      Serial.print(",");
-      Serial.print(vlast[3]);
-      Serial.print(" ");
-      Serial.println(vlast[4]);
-    */
-    judgegrey();
-
-    if (times_on_white <= 5) {
-      Millis_curtime = millis();
-
-      if (Millis_curtime - Millis_pretime >= timegap) {
-        Millis_pretime = Millis_curtime;
-
-        //on the white surface
-        if (vlast[2] < 1450 || vlast[2] > 6400) {
-          statewhite = true;//do nothing
-          times_on_white += 1;
+        if (which == 1) {
+          done1 = true;
         }
-        //not on the white surface
-        else {
-          statewhite = false;
-          times_on_white -= 1;
-          samples[index] = output;
-          index += 1;
-          if ( index >= 200 ) index = 0;
-
-
-          // Paul:  bug?  what if index == 0?
-          if ( index > 0 ) {
-            if (samples[index] == samples[index - 1]) {
-              Serial.println("MATCH: ");
-              if (has_output == false) {
-                Serial.print(" has_output==false: ");
-                Serial.print(output);
-                Serial.print(",");
-                has_output = true;
-              } else {
-
-                Serial.print(" has_output==true\n ");
-              }
-            } else {  // samples[index] != samples[index - 1])
-              Serial.print("NO MATCH: index = ");
-              Serial.print( index );
-              Serial.print(",");
-              Serial.print( samples[ index ] );
-              Serial.print( " vs " );
-              Serial.println( samples[ index -1 ] );
-              has_output = false;
-            }
-          }
-
+        if (which == 2) {
+          done2 = true;
+        }
+        if (which == 3) {
+          done3 = true;
+        }
+        if (which == 4) {
+          done4 = true;
+        }
+        if ((done0 == true) && (done1 == true) && (done2 == true) && (done3 == true) && (done4 == true) ) {
+          done = true;
         }
       }
-    }
 
-    else {
-      analogWrite(L_PWM, 0);
-      analogWrite(R_PWM, 0);
-      //      while(1){
-      //      }
+      //
+      //        sensor0 = vlast[0];
+      //        sensor1 = vlast[1];
+      //        sensor2 = vlast[2];
+      //        sensor3 = vlast[3];
+      //        sensor4 = vlast[4];
     }
 
   }
-  Serial.print("\n");
+
+  /*
+    Serial.print(vlast[0]);
+    Serial.print(" ");
+    Serial.print(vlast[1]);
+    Serial.print(" ");
+    Serial.print(vlast[2]);
+    Serial.print(",");
+    Serial.print(vlast[3]);
+    Serial.print(" ");
+    Serial.println(vlast[4]);
+  */
+  judgegrey();
+
+  if (times_on_white <= 5) {
+    Millis_curtime = millis();
+
+    if (Millis_curtime - Millis_pretime >= timegap) {
+      Millis_pretime = Millis_curtime;
+
+      //on the white surface
+      if (vlast[2] < 1450 || vlast[2] > 6400) {
+        statewhite = true;//do nothing
+        times_on_white += 1;
+      }
+      //not on the white surface
+      else {
+        statewhite = false;
+        times_on_white -= 1;
+        index += 1;
+        samples[index] = output;
+
+        if ( index >= 200 ) index = 0;
+
+
+        // Paul:  bug?  what if index == 0?
+        //          if ( index > 0 ) {
+        if (samples[index] == samples[index - 1]) {
+          //              Serial.println("MATCH: ");
+          if (has_output == false) {
+            Serial.print(" has_output==false: ");
+            Serial.print(samples[index - 1]);
+            Serial.print(",");
+            has_output = true;
+          } else {
+
+            //                Serial.print(" has_output==true\n ");
+          }
+        } else {  // samples[index] != samples[index - 1])
+          Serial.print("NO MATCH: index = ");
+          Serial.print( index );
+          Serial.print(",");
+          Serial.print( samples[ index ] );
+          Serial.print( " vs " );
+          Serial.println( samples[ index - 1 ] );
+          has_output = false;
+        }
+        //          }
+
+      }
+    }
+  }
+
+  else {
+    analogWrite(L_PWM, 0);
+    analogWrite(R_PWM, 0);
+    //      while(1){
+    //      }
+  }
+
+  //  }
+  //  Serial.print("\n");
 
 }
